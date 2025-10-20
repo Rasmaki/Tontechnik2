@@ -1,41 +1,51 @@
 import numpy as np
 import sounddevice as sd
-import threading
-import keyboard
-
-fs = 44100
-current_y = 0.001
-duration = 0.2
-current_phase = 0  # in samples
-f = 440
-
-def callback(output, frames, time, status):
-    global current_y, current_phase, f
-    t = (np.arange(frames) + current_phase) / fs
-    x = current_y * np.sin(2 * np.pi * f * t)
-    output[:, 0] = x
-    current_phase += frames
-    if current_phase > fs * 10000:
-        current_phase = current_phase % fs
-
-def iterate_y(step):
-    global current_y
-    for y in range(0, 25532, step):
-        current_y = y / 1000000
-        sd.sleep(int(duration * 1000))
-        print(current_y)
+import matplotlib.pyplot as plt
 
 
-def iterate_f(resolution):
-    global f, current_y
-    for i in range(20, 450, resolution):
-        f = i
-        threading.Thread(target=iterate_y, args=(100,), daemon=True).start()
-        sd.OutputStream(samplerate=fs, channels=1, callback=callback).start()
-        print(f)
-        if input('Press Enter to continue to the next frequency or type "exit" to stop: ') == 'exit':
-            threading.Thread(target=iterate_y, args=(100,), daemon=True).join()
-            break
+fs = sd.query_devices(sd.default.device, 'output')['default_samplerate']
+dur = 1 # Dauer
+ydb = np.arange(0, 105, 5)
+y = (10**(ydb/10))/10000000000
+t = np.arange(dur * fs) / fs
+f = [125, 250, 500, 1000, 2000, 4000, 8000]  # Frequenzen
+ydb_temp = []
+
+def play_sin(test_state):
+    for j in range(len(f)):
+        for i in range(len(y)):
+            if test_state:
+                noise = np.random.normal(0, 0.2, len(t))
+                plt.plot(noise)
+                plt.show()
+                sd.play(noise, fs)
+            x =  y[i] * np.sin(2 * np.pi * f[j] * t)
+            sd.play(x, fs)
+            sd.wait()
+            usr_input =input("Haben Sie den Ton gehört? Y/N...")
+            if usr_input == 'y':
+                print("Deine Hörschwelle bei {1} Hz ist {0} dB".format(ydb[i], f[j]))
+                ydb_temp.append(ydb[i])
+                break
+    return ydb_temp
 
 
-iterate_f(10)
+print("Linkes Ohr:")
+ydb_l = play_sin(True)
+print("Rechtes Ohr:")
+ydb_r = play_sin(False)
+print("Linkes Ohr mit verdeckung:")
+ydb_r_n = play_sin(True)
+print("Rechtes Ohr mit verdeckung:")
+ydb_l_n = play_sin(True)
+
+plt.figure()
+plt.plot(f, ydb_l, label='Linkes Ohr')
+plt.plot(f, ydb_r, label='Rechtes Ohr')
+plt.xscale('log')
+plt.legend()
+plt.title('Hörschwelle relativ zu 1kHz')
+plt.xlabel('Frequenz (Hz)')
+plt.ylabel('Hörschwelle (dB)')
+plt.grid()
+plt.show()
