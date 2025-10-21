@@ -1,6 +1,7 @@
 import numpy as np
 import sounddevice as sd
 import matplotlib.pyplot as plt
+from scipy.signal import convolve2d
 
 
 fs = sd.query_devices(sd.default.device, 'output')['default_samplerate']
@@ -10,16 +11,15 @@ y = (10**(ydb/10))/10000000000
 t = np.arange(dur * fs) / fs
 f = [125, 250, 500, 1000, 2000, 4000, 8000]  # Frequenzen
 ydb_temp = []
+noise = np.ones(len(t))
 
 def play_sin(test_state):
+    global y, noise, f, t
     for j in range(len(f)):
         for i in range(len(y)):
             if test_state:
                 noise = np.random.normal(0, 0.2, len(t))
-                plt.plot(noise)
-                plt.show()
-                sd.play(noise, fs)
-            x =  y[i] * np.sin(2 * np.pi * f[j] * t)
+            x =  y[i] * np.sin(2 * np.pi * f[j] * t)*noise[i]
             sd.play(x, fs)
             sd.wait()
             usr_input =input("Haben Sie den Ton gehört? Y/N...")
