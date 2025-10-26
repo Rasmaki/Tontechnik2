@@ -1,3 +1,12 @@
+"""
+created: 15-10-2025
+Version: 1.0
+Beschreibung: Dieses Programm führt einen einfachen Hörtest durch, bei dem Sinustöne verschiedener Frequenzen
+und Pegel abgespielt werden. Der Benutzer gibt an, ob er den Ton gehört hat, und die Hörschwelle wird für jedes Ohr
+ermittelt. Zusätzlich wird ein Rauschsignal abgespielt, um den Verdeckungseffekt zu demonstrieren.
+@author: Robert Schleßmann
+"""
+
 import numpy as np
 import sounddevice as sd
 import matplotlib.pyplot as plt
