@@ -21,15 +21,13 @@ H_db = 20 * np.log10(np.abs(H) + 1e-12)
 
 plt.figure()
 plt.semilogx(freqs, H_db)
-plt.title('Amplitude frequency response (dB)')
-plt.xlabel('Frequency (Hz)')
-plt.ylabel('Magnitude (dB)')
+plt.title('Amplitudenfrequenzgang (dB)')
+plt.xlabel('Frequenz (Hz)')
+plt.ylabel('Amplitude (dB)')
 plt.grid(True, which='both', ls='--')
 plt.show()
 
 
 #def clarity(h, fs, t_ms):
-
-
 #C50 = clarity(rir, fs, 50.0)
 #C80 = clarity(rir, fs, 80.0)
